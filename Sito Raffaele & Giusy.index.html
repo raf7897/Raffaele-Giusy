@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raffaele & Giusy (@raffaele_giusy)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-black: #000000;
+            --card-bg: #121212;
+            --border-color: #262626;
+            --text-main: #f5f5f5;
+            --text-muted: #a8a8a8;
+            --ig-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            --accent-blue: #0095f6;
+            --modal-bg: rgba(0, 0, 0, 0.95);
+            --input-bg: #1e1e1e;
+        }
+
+        /* TEMA CHIARO AUTOMATICO */
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg-black: #fafafa;
+                --card-bg: #ffffff;
+                --border-color: #dbdbdb;
+                --text-main: #262626;
+                --text-muted: #737373;
+                --modal-bg: rgba(255, 255, 255, 0.98);
+                --input-bg: #f0f0f0;
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-black); color: var(--text-main); min-height: 100vh; padding-bottom: 50px; transition: background-color 0.3s, color 0.3s; }
+
+        /* INTRO ANIMATA CUORE (ESATTAMENTE 2 BATTITI = 1.8 SECONDI) */
+        #intro-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000; display: flex; justify-content: center; align-items: center;
+            z-index: 1000; transition: opacity 0.6s ease-out, visibility 0.6s;
+        }
+        .heart {
+            width: 80px; height: 80px; background-color: #e6683c; position: relative;
+            transform: rotate(-45deg); box-shadow: 0 0 30px rgba(230, 104, 60, 0.8);
+            animation: heartBeatZoom 1.8s forwards ease-in-out;
+        }
+        .heart::before, .heart::after {
+            content: ""; width: 80px; height: 80px; background-color: #e6683c;
+            border-radius: 50%; position: absolute;
+        }
+        .heart::before { top: -40px; left: 0; }
+        .heart::after { left: 40px; top: 0; }
+        
+        @keyframes heartBeatZoom {
+            0% { transform: scale(1) rotate(-45deg); }
+            25% { transform: scale(1.3) rotate(-45deg); }
+            50% { transform: scale(1) rotate(-45deg); }
+            75% { transform: scale(1.35) rotate(-45deg); }
+            100% { transform: scale(45) rotate(-45deg); opacity: 0; }
+        }
+        .fade-out { opacity: 0; visibility: hidden; }
+
+        /* TOP BAR & PROFILE */
+        .top-bar {
+            max-width: 600px; margin: 0 auto; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-color); position: sticky; top: 0;
+            background: var(--bg-black); backdrop-filter: blur(10px); z-index: 100;
+        }
+        .top-bar h1 { font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+        .verified-badge { color: var(--accent-blue); font-size: 0.9rem; }
+
+        .main-container { max-width: 600px; margin: 0 auto; padding: 20px 15px; }
+
+        .profile-header { display: flex; align-items: center; gap: 25px; margin-bottom: 20px; }
+        .profile-avatar-ring {
+            width: 86px; height: 86px; border-radius: 50%; background: var(--ig-gradient);
+            padding: 3px; display: flex; justify-content: center; align-items: center; flex-shrink: 0;
+        }
+        .profile-avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--bg-black); }
+        .profile-stats { display: flex; gap: 20px; text-align: center; }
+        .stat-item { display: flex; flex-direction: column; }
+        .stat-num { font-weight: 700; font-size: 1.1rem; }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); }
+
+        .profile-bio { margin-bottom: 25px; line-height: 1.5; font-size: 0.95rem; }
+        .profile-bio strong { display: block; margin-bottom: 4px; }
+
+        /* STORIES */
+        .stories-container {
+            display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px;
+            margin-bottom: 25px; border-bottom: 1px solid var(--border-color); scrollbar-width: none;
+        }
+        .stories-container::-webkit-scrollbar { display: none; }
+        .story-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; min-width: 72px; }
+        .story-ring {
+            width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--border-color);
+            padding: 2px; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center;
+        }
+        .story-item.active .story-ring { border-color: transparent; background: var(--ig-gradient); }
+        .story-thumb {
+            width: 100%; height: 100%; border-radius: 50%; background: var(--card-bg);
+            border: 2px solid var(--bg-black); display: flex; justify-content: center; align-items: center; font-size: 1.2rem;
+            object-fit: cover;
+        }
+        .story-thumb-gallery {
+            width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 2px solid var(--bg-black); display: flex; justify-content: center; align-items: center;
+        }
+        .gallery-icon-svg {
+            width: 28px; height: 28px;
+        }
+        .story-title { font-size: 0.75rem; color: var(--text-muted); text-align: center; }
+        .story-item.active .story-title { color: var(--text-main); font-weight: 600; }
+
+        /* SEZIONI E CARDS */
+        .content-section { display: none; animation: fadeIn 0.4s ease-out; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .ig-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .ig-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .ig-card-header-left { display: flex; align-items: center; gap: 10px; }
+        .ig-card-title { font-size: 1.15rem; font-weight: 700; color: var(--text-main); }
+        .edit-story-btn {
+            background: rgba(0, 149, 246, 0.1); color: var(--accent-blue); border: none;
+            padding: 6px 12px; border-radius: 16px; font-size: 0.8rem; font-weight: 600;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .edit-story-btn:hover { background: rgba(0, 149, 246, 0.2); }
+        .ig-card-body { color: var(--text-main); line-height: 1.7; font-size: 0.98rem; }
+        .ig-card-body p { margin-bottom: 14px; }
+        .story-chapter-title { color: var(--accent-blue); font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 18px 0 8px 0; display: block; }
+
+        /* GRIGLIA MULTIMEDIALE INSTAGRAM */
+        .ig-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 15px; }
+        .ig-grid-item { aspect-ratio: 1; background-color: var(--border-color); overflow: hidden; position: relative; border-radius: 4px; cursor: pointer; user-select: none; }
+        .ig-grid-item img, .ig-grid-item video { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; pointer-events: none; }
+        .ig-grid-item:active img, .ig-grid-item:active video { transform: scale(0.96); }
+
+        /* UPLOAD BOX IN-PAGE */
+        .upload-ig-box {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 25px 20px; text-align: center; margin-top: 20px;
+        }
+        .upload-ig-btn {
+            display: inline-block; margin-top: 12px; padding: 12px 24px;
+            background: var(--accent-blue); color: white; font-weight: 600;
+            border-radius: 8px; cursor: pointer; font-size: 0.95rem; transition: opacity 0.2s;
+        }
+        .upload-ig-btn:hover { opacity: 0.9; }
+        input[type="file"] { display: none; }
+        #upload-status { margin-top: 12px; font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+
+        /* MODALE DI EDITING TESTO */
+        #edit-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--modal-bg); z-index: 4000; display: none;
+            justify-content: center; align-items: center; padding: 15px;
+            backdrop-filter: blur(10px);
+        }
+        #edit-modal.active { display: flex; }
+        .edit-card {
+            width: 100%; max-width: 550px; background: var(--card-bg);
+            border: 1px solid var(--border-color); border-radius: 16px;
+            padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-height: 90vh; display: flex; flex-direction: column;
+        }
+        .edit-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .edit-card-title { font-weight: 700; font-size: 1.1rem; }
+        .edit-textarea {
+            width: 100%; height: 320px; background: var(--input-bg); color: var(--text-main);
+            border: 1px solid var(--border-color); border-radius: 10px; padding: 12px;
+            font-size: 0.95rem; line-height: 1.6; resize: vertical; margin-bottom: 15px;
+        }
+        .edit-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .btn-action {
+            padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 0.9rem;
+            border: none; cursor: pointer; transition: opacity 0.2s;
+        }
+        .btn-cancel { background: var(--border-color); color: var(--text-main); }
+        .btn-reset { background: rgba(220, 38, 38, 0.15); color: #ef4444; }
+        .btn-save { background: var(--accent-blue); color: #fff; }
+
+        /* --- LIGHTBOX --- */
+        #lightbox {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.95); z-index: 2000; display: none;
+            justify-content: center; align-items: center; backdrop-filter: blur(8px);
+        }
+        #lightbox.active { display: flex; }
+        .lightbox-content {
+            max-width: 90vw; max-height: 75vh; display: flex;
+            justify-content: center; align-items: center; position: relative;
+        }
+        .lightbox-content img, .lightbox-content video {
+            max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 8px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.8);
+        }
+        .lightbox-btn {
+            position: absolute; background: rgba(255, 255, 255, 0.15); color: white;
+            border: none; font-size: 1.8rem; width: 48px; height: 48px; border-radius: 50%;
+            cursor: pointer; display: flex; justify-content: center; align-items: center;
+            transition: background 0.2s; z-index: 2100; backdrop-filter: blur(4px);
+        }
+        .lightbox-btn:hover { background: rgba(255, 255, 255, 0.3); }
+        .lightbox-close { top: 20px; right: 20px; font-size: 1.5rem; }
+        .lightbox-prev { left: 15px; }
+        .lightbox-next { right: 15px; }
+        
+        .lightbox-share-minimal {
+            position: absolute; bottom: 20px; left: 20px; z-index: 2100;
+            background: rgba(255, 255, 255, 0.1); color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+            display: flex; align-items: center; gap: 6px; cursor: pointer;
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            transition: all 0.2s ease;
+        }
+        .lightbox-share-minimal:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.25); }
+
+        .lightbox-counter {
+            position: absolute; bottom: 25px; color: #a8a8a8;
+            font-size: 0.9rem; font-weight: 600; z-index: 2100;
+        }
+
+        #toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9); color: #000; padding: 10px 20px;
+            border-radius: 20px; font-size: 0.85rem; font-weight: 600; z-index: 3000;
+            display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.4); animation: toastFade 0.3s ease;
+        }
+        @keyframes toastFade { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+        /* ANTEPRIMA IN PRESSIONE PROLUNGATA */
+        #preview-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(12px);
+            z-index: 3000; display: none; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.2s ease;
+        }
+        #preview-modal.active { display: flex; opacity: 1; }
+        .preview-card {
+            width: 85vw; max-width: 360px; background: var(--card-bg);
+            border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6); transform: scale(0.9); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #preview-modal.active .preview-card { transform: scale(1); }
+        .preview-media-container { width: 100%; aspect-ratio: 1; background: #000; overflow: hidden; }
+        .preview-media-container img, .preview-media-container video { width: 100%; height: 100%; object-fit: cover; }
+        .preview-header { padding: 12px 16px; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-color); }
+    </style>
+</head>
+<body>
+
+    <div id="intro-overlay"><div class="heart"></div></div>
+
+    <div class="top-bar">
+        <h1>Raffaele & Giusy <span class="verified-badge">✔</span></h1>
+        <span style="font-size: 1.2rem;">❤️</span>
+    </div>
+
+    <div class="main-container">
+        <div class="profile-header">
+            <div class="profile-avatar-ring">
+                <img src="https://i.postimg.cc/Y2QgxYN4/IMG-20250518-WA0100.jpg" alt="Raffaele & Giusy" class="profile-avatar-img">
+            </div>
+            <div class="profile-stats">
+                <div class="stat-item"><span class="stat-num">∞</span><span class="stat-label">Ricordi</span></div>
+                <div class="stat-item"><span class="stat-num">100%</span><span class="stat-label">Amore</span></div>
+                <div class="stat-item"><span class="stat-num">Special</span><span class="stat-label">Edition</span></div>
+            </div>
+        </div>
+
+        <div class="profile-bio">
+            <strong>Raffaele Di Sivo & Giusy Bennici</strong>
+            Benvenuti nel nostro sito ufficiale! Qui troverete la nostra storia raccontata con foto, video e piccoli testi. 📖✨
+        </div>
+
+        <!-- STORIE IN EVIDENZA -->
+        <div class="stories-container">
+            <div class="story-item active" onclick="showSection('storia', this)">
+                <div class="story-ring">
+                    <img src="https://i.postimg.cc/3NsWF9Kz/1789591196114.png" alt="La Storia" class="story-thumb">
+                </div>
+                <span class="story-title">La Storia</span>
+            </div>
+            <div class="story-item" onclick="showSection('multimedia', this)">
+                <div class="story-ring">
+                    <div class="story-thumb-gallery">
+                        <svg class="gallery-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="3" y="3" width="18" height="18" rx="5" fill="url(#galleryGradient)"/>
+                            <circle cx="8.5" cy="8.5" r="2" fill="#ffffff" fill-opacity="0.9"/>
+                            <path d="M4 17L8.5 12.5L12 16L16.5 11.5L20 15V16C20 17.6569 18.6569 19 17 19H7C5.34315 19 4 17.6569 4 16V17Z" fill="#ffffff" fill-opacity="0.95"/>
+                            <defs>
+                                <linearGradient id="galleryGradient" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#38BDF8"/>
+                                    <stop offset="0.5" stop-color="#818CF8"/>
+                                    <stop offset="1" stop-color="#C084FC"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+                <span class="story-title">Media</span>
+            </div>
+            <div class="story-item" onclick="showSection('raffaele', this)">
+                <div class="story-ring">
+                    <img src="https://i.postimg.cc/rp2RhvbN/IMG-20230930-114318-945.jpg" alt="Raffaele" class="story-thumb">
+                </div>
+                <span class="story-title">Raffaele</span>
+            </div>
+            <div class="story-item" onclick="showSection('giusy', this)">
+                <div class="story-ring">
+                    <img src="https://i.postimg.cc/8kY5K2fW/20250301-113541.jpg" alt="Giusy" class="story-thumb">
+                </div>
+                <span class="story-title">Giusy</span>
+            </div>
+        </div>
+
+        <!-- 1. LA NOSTRA STORIA -->
+        <div id="storia" class="content-section active">
+            <div class="ig-card">
+                <div class="ig-card-header">
+                    <div class="ig-card-header-left">
+                        <span>✨</span>
+                        <div class="ig-card-title">La Nostra Storia</div>
+                    </div>
+                    <button class="edit-story-btn" onclick="openEditModal('storia')">✏️ Modifica</button>
+                </div>
+                <div class="ig-card-body" id="body-storia">
+                    
+                    <span class="story-chapter-title">📍 L'Incontro a Tropea – Estate 2024</span>
+                    <p>Correva l'anno 2024, era la fine delle ferie di una calda estate, quando Raffaele, con i suoi amici scelse di fare 3 giorni in quella che è soprannominata "La costa degli Dei", a Tropea.</p>
+                    <p>Ad un certo punto del viaggio, mentre erano quasi arrivati a destinazione, Raffaele, Domenico e Pasquale ricevono il messaggio di Carla (che già era in Calabria dagli zii): <i>"Stasera ci sono 3 mie amiche"</i>.</p>
+                    <p>Quella sera Giusy, sua sorella Valentina e loro cugina Benny, arrivarono in treno da Rosarno a Tropea, fu uno di quei treni che passano una sola volta nella vita.</p>
+                    <p>Raffaele andò a prenderle alla stazione; dallo specchietto retrovisore si intravedevano degli occhi affascinanti, magnetici.</p>
+
+                    <span class="story-chapter-title">🍝 La Cena e quegli occhi magnetici</span>
+                    <p>Cenarono tutti insieme, ci fu una bella tavolata, c'erano salumi, formaggi di ogni genere per antipasto, perfino le confetture e il miele per accompagnare. Raffaele cucinò un suo piatto forte, linguine ai pomodorini freschi, con un pizzico di 'nduja calabrese (per rendere la ricetta più vicina alle tradizioni del posto). La serata andò molto bene, si rideva, si scherzava, si facevano battute squallide.</p>
+                    <p>Nel frattempo tra Raffaele e Giusy c'era qualcosa di particolare, sguardi di curiosità, di complicità a tratti, era tutto così misterioso. Raffaele si incantava spesso guardando quegli occhi, magnetici a tal punto da creargli distrazione a tratti.</p>
+                    <p>Giusy si alzò e diede una mano a Raffaele con i piatti e le posate, senza che lui le avesse chiesto nulla.</p>
+                    <p>La serata andò avanti per le strade di Tropea illuminate e piene di gente, souvenir, prodotti tipici, risate e chiacchiere. Raffaele era incuriosito da Giusy, le chiedeva tante cose: come mai fosse a Roma essendo calabrese, le domandava del lavoro, della sua famiglia. Giusy rispondeva a tutte le domande, sembrava quasi incuriosita da quella sorta di interrogatorio.</p>
+                    <p>Alla fine della serata, ci sono i saluti, baci a guancia, ma Raffaele si distrae così tanto da salutare Giusy due volte, forse per piacere, forse per distrazione, chi lo sa...</p>
+                    <p><i>Il seme dell'amore era ancora acerbo, ma era stato piantato...</i></p>
+
+                    <span class="story-chapter-title">💬 I primi contatti e l'inizio dell'intesa</span>
+                    <p>Il giorno dopo, verso le 6:45 arriva una notifica a Giusy: <b>"Raffaele Di Sivo vuole seguirti"</b>. Lei guarda la notifica e torna a dormire, accetterà più tardi.</p>
+                    <p>Raffaele vede una storia di Giusy riguardante il segno zodiacale dell'acquario e non perde occasione per utilizzare i suoi pessimi modi di approccio; magari non voleva approcciare, voleva solo chiacchierare, fatto sta che cita la sua ex svariate volte, in quanto anche lei dello stesso segno.</p>
+                    <p>I due da quel momento trascorrono giornate intere a chiacchierare via chat.</p>
+                    <p>Raffaele aveva un problema, era invaghito di una ragazza che probabilmente lo usava a suo vantaggio per sentirsi ammirata. Giusy gli dava addirittura dei consigli da amica fidata quale stava diventando.</p>
+                    <p>Ad un certo punto Raffaele inizia a farsi delle domande, non capiva come mai tanto affiatamento da parte di entrambi, eppure si era soltanto amici. Quell'amicizia che in fondo in fondo, sarebbe potuta diventare qualcos'altro, ma ancora era presto per dirlo.</p>
+
+                    <span class="story-chapter-title">🌅 Il Primo Bacio e le Giornate Magiche</span>
+                    <p>Dopo una settimana dall'incontro a Tropea, Raffaele iniziò a pensare di organizzare gite a Roma con gli amici, chissà per quale motivo...</p>
+                    <p>Un giorno Raffaele si accorse che la sua amica forse non era fatta per lui, che forse stava sprecando il suo tempo dietro chi non gli dava tanto ascolto e voleva solo attenzioni per sé. Pian piano iniziò ad allontanarsi da lei, in silenzio.</p>
+                    <p>Nel frattempo Giusy prendeva sempre più parte del suo cuore, entrando in punta di piedi, giorno dopo giorno.</p>
+                    <p>I due iniziarono ad uscire tutti i fine settimana, Raffaele coglieva l'attimo per andare a trovarla anche solo per un'ora. Giusy si iniziò a rendere conto che stava nascendo qualcosa di diverso dal passato. Raffaele anche.</p>
+                    <p><b>Sul laghetto dell'Eur</b>, una domenica mattina, dopo aver fatto un bell'aperitivo al bar vista lago, i due presero a passeggiare lungo le stradine. Quando ad un certo punto avvenne una magia, qualcosa di indescrivibile, di una purezza affascinante e bella: <b>il loro primo bacio...</b></p>
+                    <p>Da lì in poi i two capirono che stava nascendo qualcosa di più di una semplice conoscenza...</p>
+                    <p>Poi andarono a pranzo al lago Albano, dove passarono una giornata molto gradevole e per finire, una passeggiata con tanto di sosta sdraiati in riva al lago. Raffaele le cantava canzoni, la baciava, la riempiva di carezze, fu una giornata magica...</p>
+                    <p>Però il giorno in cui i loro cuori si sono legati ancor più in un legame profondo, fu quando un sabato pomeriggio Raffaele si fece 3 ore e mezza di macchina andata e ritorno per stare poco più di un'ora con la sua Giusy; quel giorno è rimasso impresso nelle loro menti e nei loro cuori in modo indissolubile.</p>
+
+                    <span class="story-chapter-title">❤️ 28 Settembre 2024 – L'Inizio Ufficiale</span>
+                    <p>Era il <b>28 settembre del 2024</b>, Raffaele aveva convinto Giusy a venire a dormire da lui, presero un B&B: per la prima volta avrebbero dormito insieme.</p>
+                    <p>E niente, quel 28 settembre alle <b>16:25</b>, durante il check-in al B&B, decisero di fidanzarsi ufficialmente... il come, resta un loro ricordo...</p>
+                    <p>Passano i mesi, passa un anno, la loro storia prende forma, capiscono che probabilmente sarà quella la strada da seguire per costruire un futuro insieme.</p>
+
+                    <span class="story-chapter-title">💍 26 Dicembre 2025 – La Proposta a Tropea</span>
+                    <p>Arriva Natale, Raffaele scende in Calabria la sera col treno.</p>
+                    <p>Il <b>26 dicembre 2025</b>, si va con tutta la famiglia di Giusy a Tropea, il posto dove si sono conosciuti l'anno prima.</p>
+                    <p>In quelle stradine magiche, ornamentate per il Natale, alla vista panoramica del castello, Raffaele si inginocchia davanti a Giusy con un anello di diamante: <br><br><b><i>"Amore mio, mi vuoi sposare?"</i></b></p>
+                    <p>Giusy senza esitazione: <b><i>"Sìì!"</i></b></p>
+                    <p>I two si abbracciano, si baciano, con l'applauso dei passanti. Dentro di loro si è appena posato il primo mattone per la costruzione di quello che dovrà essere un amore eterno, il loro <i>"e vissero per sempre felici e contenti"</i>.</p>
+
+                    <p style="text-align: center; color: var(--accent-blue); font-weight: 700; margin-top: 25px; font-size: 1.1rem;">
+                        Il resto è storia... ❤️✨
+                    </p>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. RACCONTI MULTIMEDIALI -->
+        <div id="multimedia" class="content-section">
+            <div class="ig-card">
+                <div class="ig-card-header">
+                    <div class="ig-card-header-left">
+                        <span>🎬</span>
+                        <div class="ig-card-title">Raccenti Multimediali</div>
+                    </div>
+                </div>
+                <div class="ig-card-body"><p>Tieni premuto per l'anteprima, tocca per aprire a schermo intero:</p></div>
+                
+                <div id="media-grid" class="ig-grid">
+                    <div style="grid-column: span 3; text-align: center; color: var(--text-muted); padding: 20px;">
+                        Caricamento foto in corso... ⏳
+                    </div>
+                </div>
+            </div>
+
+            <div class="upload-ig-box">
+                <div style="font-size: 2rem; margin-bottom: 8px;">➕</div>
+                <h3 style="font-size: 1rem;">Aggiungi una nuova foto o video</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Carica direttamente da qui senza uscire dalla pagina!</p>
+                
+                <label for="directFileInput" class="upload-ig-btn">Seleziona File</label>
+                <input type="file" id="directFileInput" accept="image/*,video/*" onchange="uploadFileDirectly(this)">
+                <div id="upload-status"></div>
+            </div>
+        </div>
+
+        <!-- 3. RAFFAELE -->
+        <div id="raffaele" class="content-section">
+            <div class="ig-card">
+                <div class="ig-card-header">
+                    <div class="ig-card-header-left">
+                        <span>👤</span>
+                        <div class="ig-card-title">Raffaele Di Sivo</div>
+                    </div>
+                    <button class="edit-story-btn" onclick="openEditModal('raffaele')">✏️ Modifica</button>
+                </div>
+                <div class="ig-card-body" id="body-raffaele">
+                    
+                    <span class="story-chapter-title">🏠 L'Infanzia e le Radici a Marcianise</span>
+                    <p>Nato a Caserta in un caldo <b>7 agosto del 1997</b> da mamma Katia e papà Mimmo.</p>
+                    <p>Cresce a Marcianise, dove sarà in compagnia delle cugine e dei nonni che lo ameranno in maniera incondizionata. Dopo 3 anni nasce sua sorella Maria, che lo stuzzica già a pochi giorni di vita, arrivata forse per portare quel pepe che mancava.</p>
+
+                    <span class="story-chapter-title">🌊 I Nonni e le Estati a Baia Domizia</span>
+                    <p>Nonno Salvatore, il nonno materno purtroppo viene a mancare presto... Però restano nonna Giggetta e i nonni paterni, Raffaele e Maria, con i quali cresce molto affezionato.</p>
+                    <p>Nonno Raffaele è stato una grande parte nella sua infanzia: amico fidato, era tutto per lui. Era specialmente il protagonista delle lunghe estati passate a Baia Domizia, in quella casa di campagna che col tempo ha assunto un valore inestimabile nel cuore di Raffaele.</p>
+                    <p>Dopo una lunga e dolorosa trafila, il tanto amato nonno viene purtroppo a mancare, portando una svolta nella vita dell'ormai adolescente Raffaele.</p>
+
+                    <span class="story-chapter-title">🎶 Primi Amori e la Rinascita</span>
+                    <p>Il legame di Raffaele con l'amore è sempre stato particolare: si è innamorato sempre follemente, ma è stato un po' sfortunatello. Il suo primo amore è stato all'asilo per una bambina di nome Paola, poi dalle elementari fino alle medie per una ragazzina di nome Maria.</p>
+                    <p>Dopo un paio di fidanzatine conosce quella che sarà una lunga e tortuosa storia durata 6 anni e mezzo.</p>
+                    <p>Dopo essersi lasciato, Raffaele decide di dare una svolta alla sua vita: inizia un periodo di sofferenza ma anche di grande crescita personale, dove si dedica tanto al lavoro e a cercare nuove amicizie.</p>
+                    <p>Trova nuovi amici, nuove amiche, vive avventure e amicizie un po' piccanti... ma trova soprattutto amici di cuore, disinteressati, che vogliono passare del tempo insieme ridendo, scherzando, dicendo e facendo cazzate.</p>
+                    <p>Scopre un lato di sé che conosceva poco, un lato da protagonista: ama tanto stare al centro dell'attenzione, cantare al karaoke, dare spettacolo!</p>
+
+                    <span class="story-chapter-title">🧭 Verso la svolta a Tropea</span>
+                    <p>Un giorno si invaghisce di una ragazza, senza capire subito che non è esattamente il suo tipo. Lui ci prova, ma lei lo tratta da amico; richiede però attenzioni, lo cerca, ha capito le sue intenzioni ma preferisce tenerlo lì.</p>
+                    <p>Raffaele nel frattempo, dopo un'estate passata con i suoi amici a Baia Domizia, decide di andare a Tropea con loro...</p>
+                    
+                    <p style="color: var(--accent-blue); font-weight: 600; text-align: center; margin-top: 15px;">
+                        Ignaro del fatto che quel viaggio avrebbe cambiato la sua vita per sempre... ❤️
+                    </p>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. GIUSY -->
+        <div id="giusy" class="content-section">
+            <div class="ig-card">
+                <div class="ig-card-header">
+                    <div class="ig-card-header-left">
+                        <span>🌸</span>
+                        <div class="ig-card-title">Giusy Bennici</div>
+                    </div>
+                    <button class="edit-story-btn" onclick="openEditModal('giusy')">✏️ Modifica</button>
+                </div>
+                <div class="ig-card-body" id="body-giusy">
+                    
+                    <span class="story-chapter-title">🏡 Le Radici in Calabria</span>
+                    <p>Giusy Bennici nasce a Cinquefrondi (A CCALABBRIA!) il <b>19 febbraio del 1997</b>, in una famiglia umile, tranquilla, fortemente attaccata alle tradizioni e con uno spiccato senso di "famiglia".</p>
+                    <p>Cresce a Rosarno, spesso in compagnia dei suoi amati nonni, sia materni che paterni. Passa indimenticabili estati alla pineta (dove nonno Cenzo era custode) in compagnia dei cugini e del resto della famiglia.</p>
+                    <p>Insieme a sua sorella Valentina e suo fratello Filippo, passa un'infanzia carica di emozioni, di semplicità, crescendo con valori sani e forti, impressi dai nonni materni Cenzo e Mèla, e dai nonni paterni Filippo e Pina.</p>
+
+                    <span class="story-chapter-title">🥐 Il Lavoro a Rosarno</span>
+                    <p>Ha lavorato per un lungo periodo nella miglior pasticceria di Rosarno e dintorni, <i>Garruzzo Dolciaria</i> (che fa dei cannoli e dei torciglioni ripieni da paura!).</p>
+                    <p>Crescendo ha un paio di storie d'amore, tutte con uno stesso fil rouge, ovvero destinate a terminare, a non essere nulla di così forte ed emozionante.</p>
+
+                    <span class="story-chapter-title">🍇 La Nuova Vita ai Castelli Romani</span>
+                    <p>Dopo essersi lasciata l'ultima volta, e dopo aver subito un forte lutto in famiglia, decide un po' a malincuore e un po' con quella voglia di svoltare la sua vita, di andare a vivere ai Castelli Romani dai suoi zii materni, dove trova lavoro inizialmente al bar del cugino e poi all'ingrosso di bibite degli zii.</p>
+                    <p>Verrà raggiunta poco tempo dopo dal padre Franco, la mamma Cata e la sorella Valentina. Per un periodo c'è stato anche suo fratello Filippo con la compagna Martina, che con la nuova arrivata Ludovica, riempivano la casa di gioia e amore.</p>
+
+                    <span class="story-chapter-title">🚂 Quel Treno che Passa una Volta Sola</span>
+                    <p>Era l'estate del 2024, quando il <b>17 agosto</b>, prima di andare via il giorno dopo, la sua amica Carla invitò lei, Valentina e sua cugina Benny a cena con degli amici che venivano da Marcianise.</p>
+                    <p>Valentina era un po' in ansia, come suo solito: <i>"Chi li conosce questi ragazzi?"</i>, anche se c'era una sorta di garanzia di Carla che sembrava una brava ragazza.</p>
+                    <p>Quella sera Giusy e Valentina litigano, stanno quasi per dare buca all'appuntamento! Poi si decidono all'ultimo momento di andare alla stazione, dove prendono il treno per un pelo...</p>
+                    <p style="color: var(--accent-blue); font-weight: 600; text-align: center; margin-top: 15px;">
+                        Per Giusy era uno di quei treni che passano una volta sola nella vita... 💖
+                    </p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE MODIFICA TESTO -->
+    <div id="edit-modal">
+        <div class="edit-card">
+            <div class="edit-card-header">
+                <span class="edit-card-title" id="edit-modal-title">Modifica Testo</span>
+                <button style="background:none; border:none; color:var(--text-muted); font-size:1.4rem; cursor:pointer;" onclick="closeEditModal()">✕</button>
+            </div>
+            <textarea id="edit-textarea" class="edit-textarea" placeholder="Inserisci il tuo testo (puoi usare HTML semplice come <b>, <i>, <p>)..."></textarea>
+            <div class="edit-actions">
+                <button class="btn-action btn-reset" onclick="resetStoryText()">Ripristina Originale</button>
+                <button class="btn-action btn-cancel" onclick="closeEditModal()">Annulla</button>
+                <button class="btn-action btn-save" onclick="saveStoryText()">Salva Modifiche</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX MODAL -->
+    <div id="lightbox">
+        <button class="lightbox-btn lightbox-close" onclick="closeLightbox()">✕</button>
+        <button class="lightbox-btn lightbox-prev" onclick="prevMedia()">❮</button>
+        <div class="lightbox-content" id="lightbox-container"></div>
+        <button class="lightbox-btn lightbox-next" onclick="nextMedia()">❯</button>
+        
+        <button class="lightbox-share-minimal" onclick="universalShare(this)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+            <span>Condividi</span>
+        </button>
+
+        <div class="lightbox-counter" id="lightbox-counter">1 / 1</div>
+    </div>
+
+    <!-- NOTIFICA TOAST -->
+    <div id="toast">Link copiato negli appunti! 📋</div>
+
+    <!-- PREVIEW MODAL (LONG PRESS) -->
+    <div id="preview-modal">
+        <div class="preview-card">
+            <div class="preview-header">
+                <img src="https://i.postimg.cc/Y2QgxYN4/IMG-20250518-WA0100.jpg" style="width:24px; height:24px; border-radius:50%; object-fit:cover;">
+                <span>raffaele_giusy</span>
+            </div>
+            <div class="preview-media-container" id="preview-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAu0kiODmiZGQb5mj1gCtI97ce-iPNF9itqvpdNPeigxJqXmCGv6znNiQuhykUL4Olmg/exec";
+
+        let mediaList = [];
+        let currentIndex = 0;
+        let pressTimer = null;
+        let isLongPress = false;
+        let touchStartPos = { x: 0, y: 0 };
+        let isScrolling = false;
+        let activeEditKey = null;
+
+        // Salva i testi originali per ripristino
+        const defaultTexts = {};
+
+        document.addEventListener("DOMContentLoaded", () => {
+            ['storia', 'raffaele', 'giusy'].forEach(key => {
+                const el = document.getElementById(`body-${key}`);
+                if (el) {
+                    defaultTexts[key] = el.innerHTML;
+                    const saved = localStorage.getItem(`custom_story_${key}`);
+                    if (saved) el.innerHTML = saved;
+                }
+            });
+        });
+
+        // INTRO OVERLAY CON DURATA EXACTA 2 BATTITI (1.8s)
+        setTimeout(() => {
+            document.getElementById('intro-overlay').classList.add('fade-out');
+        }, 1800);
+
+        function showSection(sectionId, storyElement) {
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.story-item').forEach(st => st.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            storyElement.classList.add('active');
+            if (sectionId === 'multimedia') loadDriveMedia();
+        }
+
+        /* GESTIONE EDITING TESTO */
+        function openEditModal(key) {
+            activeEditKey = key;
+            const bodyEl = document.getElementById(`body-${key}`);
+            document.getElementById('edit-textarea').value = bodyEl ? bodyEl.innerHTML : '';
+            document.getElementById('edit-modal-title').innerText = `Modifica: ${key.toUpperCase()}`;
+            document.getElementById('edit-modal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('active');
+            activeEditKey = null;
+        }
+
+        function saveStoryText() {
+            if (!activeEditKey) return;
+            const newText = document.getElementById('edit-textarea').value;
+            const bodyEl = document.getElementById(`body-${activeEditKey}`);
+            if (bodyEl) {
+                bodyEl.innerHTML = newText;
+                localStorage.setItem(`custom_story_${activeEditKey}`, newText);
+            }
+            closeEditModal();
+            showToast("Testo salvato con successo!");
+        }
+
+        function resetStoryText() {
+            if (!activeEditKey) return;
+            if (confirm("Vuoi davvero ripristinare il testo originale?")) {
+                const bodyEl = document.getElementById(`body-${activeEditKey}`);
+                if (bodyEl && defaultTexts[activeEditKey]) {
+                    bodyEl.innerHTML = defaultTexts[activeEditKey];
+                    localStorage.removeItem(`custom_story_${activeEditKey}`);
+                }
+                closeEditModal();
+                showToast("Testo ripristinato!");
+            }
+        }
+
+        /* GESTIONE MEDIA GOOGLE DRIVE */
+        function loadDriveMedia() {
+            const grid = document.getElementById('media-grid');
+
+            fetch(SCRIPT_URL)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        grid.innerHTML = '<div style="grid-column: span 3; text-align: center; color: var(--text-muted); padding: 20px;">Nessun file presente nell\'album. Caricane uno qui sotto!</div>';
+                        return;
+                    }
+                    mediaList = data;
+                    grid.innerHTML = data.map((item, index) => {
+                        const mediaHtml = item.mimeType.startsWith('video/')
+                            ? `<video src="${item.url}#t=0.5" preload="metadata"></video>`
+                            : `<img src="${item.url}" loading="lazy" alt="Ricordo">`;
+                        
+                        return `<div class="ig-grid-item" 
+                                     ontouchstart="handleTouchStart(event, ${index})" 
+                                     ontouchmove="handleTouchMove(event)" 
+                                     ontouchend="handleTouchEnd(event, ${index})" 
+                                     onmousedown="startPress(event, ${index})" 
+                                     onmouseup="endPress(event, ${index})" 
+                                     onmouseleave="cancelPress()">
+                                    ${mediaHtml}
+                                </div>`;
+                    }).join('');
+                })
+                .catch(() => {
+                    grid.innerHTML = '<div style="grid-column: span 3; text-align: center; color: var(--text-muted); padding: 20px;">Caricamento completato o in attesa di file.</div>';
+                });
+        }
+
+        function handleTouchStart(e, index) {
+            isScrolling = false;
+            touchStartPos.x = e.touches[0].clientX;
+            touchStartPos.y = e.touches[0].clientY;
+            startPress(e, index);
+        }
+
+        function handleTouchMove(e) {
+            const moveX = Math.abs(e.touches[0].clientX - touchStartPos.x);
+            const moveY = Math.abs(e.touches[0].clientY - touchStartPos.y);
+            if (moveX > 8 || moveY > 8) {
+                isScrolling = true;
+                cancelPress();
+            }
+        }
+
+        function handleTouchEnd(e, index) {
+            if (isScrolling) {
+                cancelPress();
+                return;
+            }
+            endPress(e, index);
+        }
+
+        function startPress(e, index) {
+            isLongPress = false;
+            pressTimer = setTimeout(() => {
+                if (!isScrolling) {
+                    isLongPress = true;
+                    showPreview(index);
+                }
+            }, 380);
+        }
+
+        function endPress(e, index) {
+            clearTimeout(pressTimer);
+            if (isLongPress) {
+                hidePreview();
+            } else if (!isScrolling) {
+                openLightbox(index);
+            }
+        }
+
+        function cancelPress() {
+            clearTimeout(pressTimer);
+            hidePreview();
+        }
+
+        function showPreview(index) {
+            const previewModal = document.getElementById('preview-modal');
+            const container = document.getElementById('preview-container');
+            const item = mediaList[index];
+            if (!item) return;
+
+            if (item.mimeType.startsWith('video/')) {
+                container.innerHTML = `<video src="${item.url}" autoplay loop muted></video>`;
+            } else {
+                container.innerHTML = `<img src="${item.url}" alt="Anteprima">`;
+            }
+            previewModal.classList.add('active');
+        }
+
+        function hidePreview() {
+            const previewModal = document.getElementById('preview-modal');
+            previewModal.classList.remove('active');
+            setTimeout(() => {
+                document.getElementById('preview-container').innerHTML = '';
+            }, 200);
+        }
+
+        function openLightbox(index) {
+            currentIndex = index;
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.add('active');
+            renderMedia();
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.getElementById('lightbox-container').innerHTML = '';
+        }
+
+        function renderMedia() {
+            const container = document.getElementById('lightbox-container');
+            const item = mediaList[currentIndex];
+            if (!item) return;
+
+            if (item.mimeType.startsWith('video/')) {
+                container.innerHTML = `<video src="${item.url}" controls autoplay></video>`;
+            } else {
+                container.innerHTML = `<img src="${item.url}" alt="Ricordo">`;
+            }
+            document.getElementById('lightbox-counter').innerText = `${currentIndex + 1} / ${mediaList.length}`;
+        }
+
+        function nextMedia() {
+            if (mediaList.length === 0) return;
+            currentIndex = (currentIndex + 1) % mediaList.length;
+            renderMedia();
+        }
+
+        function prevMedia() {
+            if (mediaList.length === 0) return;
+            currentIndex = (currentIndex - 1 + mediaList.length) % mediaList.length;
+            renderMedia();
+        }
+
+        async function universalShare(btn) {
+            const item = mediaList[currentIndex];
+            if (!item) return;
+
+            if (navigator.share) {
+                try {
+                    if (navigator.canShare) {
+                        const response = await fetch(item.url);
+                        const blob = await response.blob();
+                        const ext = item.mimeType.startsWith('video/') ? 'mp4' : 'jpg';
+                        const file = new File([blob], `ricordo_${currentIndex + 1}.${ext}`, { type: item.mimeType });
+
+                        if (navigator.canShare({ files: [file] })) {
+                            await navigator.share({
+                                files: [file],
+                                title: 'Raffaele & Giusy',
+                                text: 'Un nostro ricordo speciale! ❤️'
+                            });
+                            return;
+                        }
+                    }
+
+                    await navigator.share({
+                        title: 'Raffaele & Giusy',
+                        text: 'Guarda questo ricordo speciale! ❤️',
+                        url: item.url
+                    });
+                    return;
+                } catch (err) {
+                    if (err.name === 'AbortError') return;
+                }
+            }
+
+            try {
+                await navigator.clipboard.writeText(item.url);
+                showToast("Link copiato negli appunti! 📋");
+            } catch (err) {
+                showToast("Impossibile condividere.");
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2500);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const lightbox = document.getElementById('lightbox');
+            if (!lightbox.classList.contains('active')) return;
+            if (e.key === 'ArrowRight') nextMedia();
+            if (e.key === 'ArrowLeft') prevMedia();
+            if (e.key === 'Escape') closeLightbox();
+        });
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const lightbox = document.getElementById('lightbox');
+
+        lightbox.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        lightbox.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) nextMedia();
+            if (touchEndX > touchStartX + 50) prevMedia();
+        }
+
+        function uploadFileDirectly(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const status = document.getElementById('upload-status');
+            status.innerText = "Caricamento in corso... ⏳";
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64 = e.target.result.split(',')[1];
+                const payload = { name: file.name, type: file.type, base64: base64 };
+
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        status.innerText = "Caricato con successo! 🎉 Aggiorno la griglia...";
+                        setTimeout(loadDriveMedia, 1500);
+                    } else {
+                        status.innerText = "Errore durante il caricamento.";
+                    }
+                })
+                .catch(() => {
+                    status.innerText = "File inviato a Drive! Ricarica la sezione tra un istante.";
+                    setTimeout(loadDriveMedia, 2000);
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        loadDriveMedia();
+    </script>
+</body>
+</html>
