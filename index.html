@@ -137,8 +137,20 @@
         /* GRIGLIA MULTIMEDIALE INSTAGRAM */
         .ig-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 15px; }
         .ig-grid-item { aspect-ratio: 1; background-color: var(--border-color); overflow: hidden; position: relative; border-radius: 4px; cursor: pointer; user-select: none; }
-        .ig-grid-item img, .ig-grid-item video { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; pointer-events: none; }
-        .ig-grid-item:active img, .ig-grid-item:active video { transform: scale(0.96); }
+        .ig-grid-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; pointer-events: none; }
+        .ig-grid-item:active img { transform: scale(0.96); }
+
+        /* BADGE VIDEO PLAY PER LA GRIGLIA */
+        .video-thumbnail-box {
+            width: 100%; height: 100%; background: #111; display: flex;
+            justify-content: center; align-items: center; position: relative;
+        }
+        .video-play-icon {
+            width: 38px; height: 38px; background: rgba(0, 0, 0, 0.65);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            color: #fff; font-size: 1.1rem; border: 1.5px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+        }
 
         /* UPLOAD BOX IN-PAGE */
         .upload-ig-box {
@@ -183,7 +195,7 @@
         .btn-reset { background: rgba(220, 38, 38, 0.15); color: #ef4444; }
         .btn-save { background: var(--accent-blue); color: #fff; }
 
-        /* --- LIGHTBOX --- */
+        /* --- LIGHTBOX (VISUALIZZATORE SCHERMO INTERO) --- */
         #lightbox {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0.95); z-index: 2000; display: none;
@@ -191,12 +203,16 @@
         }
         #lightbox.active { display: flex; }
         .lightbox-content {
-            max-width: 90vw; max-height: 75vh; display: flex;
+            width: 100vw; height: 75vh; max-width: 600px; display: flex;
             justify-content: center; align-items: center; position: relative;
         }
-        .lightbox-content img, .lightbox-content video {
+        .lightbox-content img {
             max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 8px;
             box-shadow: 0 5px 25px rgba(0,0,0,0.8);
+        }
+        .lightbox-content iframe {
+            width: 90vw; height: 60vh; max-width: 550px; border: none; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
         .lightbox-btn {
             position: absolute; background: rgba(255, 255, 255, 0.15); color: white;
@@ -248,7 +264,7 @@
         }
         #preview-modal.active .preview-card { transform: scale(1); }
         .preview-media-container { width: 100%; aspect-ratio: 1; background: #000; overflow: hidden; }
-        .preview-media-container img, .preview-media-container video { width: 100%; height: 100%; object-fit: cover; }
+        .preview-media-container img { width: 100%; height: 100%; object-fit: cover; }
         .preview-header { padding: 12px 16px; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-color); }
     </style>
 </head>
@@ -496,7 +512,7 @@
                 <span class="edit-card-title" id="edit-modal-title">Modifica Testo</span>
                 <button style="background:none; border:none; color:var(--text-muted); font-size:1.4rem; cursor:pointer;" onclick="closeEditModal()">✕</button>
             </div>
-            <textarea id="edit-textarea" class="edit-textarea" placeholder="Inserisci il tuo testo (puoi usare HTML semplice come <b>, <i>, <p>)..."></textarea>
+            <textarea id="edit-textarea" class="edit-textarea" placeholder="Inserisci il tuo testo..."></textarea>
             <div class="edit-actions">
                 <button class="btn-action btn-reset" onclick="resetStoryText()">Ripristina Originale</button>
                 <button class="btn-action btn-cancel" onclick="closeEditModal()">Annulla</button>
@@ -558,11 +574,10 @@
                 }
             });
 
-            // Imposta lo stato iniziale della cronologia
             history.replaceState({ section: 'storia', modalOpen: false }, '', '');
         });
 
-        // GESTIONE TASTO INDIETRO DEL BROWSER/DISPOSITIVO (History API)
+        // GESTIONE TASTO INDIETRO DEL BROWSER/TELEFONO
         window.addEventListener('popstate', (event) => {
             const lightbox = document.getElementById('lightbox');
             const editModal = document.getElementById('edit-modal');
@@ -654,7 +669,13 @@
             }
         }
 
-        /* GESTIONE MEDIA GOOGLE DRIVE (CON CARICAMENTO VELOCE) */
+        /* GESTIONE MEDIA GOOGLE DRIVE (OTTIMIZZATO PER VIDEO E FOTO) */
+        function getDriveFileId(url) {
+            if (!url) return '';
+            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            return match ? match[1] : '';
+        }
+
         function loadDriveMedia() {
             const grid = document.getElementById('media-grid');
 
@@ -667,16 +688,22 @@
                     }
                     mediaList = data;
                     grid.innerHTML = data.map((item, index) => {
-                        // OTTIMIZZAZIONE VELOCITA: Richiede la versione ridimensionata a 800px da Google
-                        let fastUrl = item.url;
-                        if (!item.mimeType.startsWith('video/') && item.url.includes('googleusercontent.com')) {
-                            fastUrl = item.url + "=w800";
+                        const isVideo = item.mimeType.startsWith('video/');
+                        let mediaHtml = '';
+
+                        if (isVideo) {
+                            mediaHtml = `
+                                <div class="video-thumbnail-box">
+                                    <div class="video-play-icon">▶</div>
+                                </div>`;
+                        } else {
+                            let fastUrl = item.url;
+                            if (item.url.includes('googleusercontent.com')) {
+                                fastUrl = item.url + "=w800";
+                            }
+                            mediaHtml = `<img src="${fastUrl}" loading="lazy" alt="Ricordo">`;
                         }
 
-                        const mediaHtml = item.mimeType.startsWith('video/')
-                            ? `<video src="${item.url}#t=0.5" preload="metadata"></video>`
-                            : `<img src="${fastUrl}" loading="lazy" alt="Ricordo">`;
-                        
                         return `<div class="ig-grid-item" 
                                      ontouchstart="handleTouchStart(event, ${index})" 
                                      ontouchmove="handleTouchMove(event)" 
@@ -747,14 +774,16 @@
             const item = mediaList[index];
             if (!item) return;
 
-            let previewUrl = item.url;
-            if (!item.mimeType.startsWith('video/') && item.url.includes('googleusercontent.com')) {
-                previewUrl = item.url + "=w800";
-            }
+            const isVideo = item.mimeType.startsWith('video/');
 
-            if (item.mimeType.startsWith('video/')) {
-                container.innerHTML = `<video src="${item.url}" autoplay loop muted></video>`;
+            if (isVideo) {
+                const fileId = getDriveFileId(item.url);
+                container.innerHTML = `<iframe src="https://drive.google.com/file/d/${fileId}/preview" allow="autoplay"></iframe>`;
             } else {
+                let previewUrl = item.url;
+                if (item.url.includes('googleusercontent.com')) {
+                    previewUrl = item.url + "=w800";
+                }
                 container.innerHTML = `<img src="${previewUrl}" alt="Anteprima">`;
             }
             previewModal.classList.add('active');
@@ -789,8 +818,11 @@
             const item = mediaList[currentIndex];
             if (!item) return;
 
-            if (item.mimeType.startsWith('video/')) {
-                container.innerHTML = `<video src="${item.url}" controls autoplay></video>`;
+            const isVideo = item.mimeType.startsWith('video/');
+
+            if (isVideo) {
+                const fileId = getDriveFileId(item.url);
+                container.innerHTML = `<iframe src="https://drive.google.com/file/d/${fileId}/preview" allow="autoplay" allowfullscreen="true"></iframe>`;
             } else {
                 container.innerHTML = `<img src="${item.url}" alt="Ricordo">`;
             }
@@ -815,22 +847,6 @@
 
             if (navigator.share) {
                 try {
-                    if (navigator.canShare) {
-                        const response = await fetch(item.url);
-                        const blob = await response.blob();
-                        const ext = item.mimeType.startsWith('video/') ? 'mp4' : 'jpg';
-                        const file = new File([blob], `ricordo_${currentIndex + 1}.${ext}`, { type: item.mimeType });
-
-                        if (navigator.canShare({ files: [file] })) {
-                            await navigator.share({
-                                files: [file],
-                                title: 'Raffaele & Giusy',
-                                text: 'Un nostro ricordo speciale! ❤️'
-                            });
-                            return;
-                        }
-                    }
-
                     await navigator.share({
                         title: 'Raffaele & Giusy',
                         text: 'Guarda questo ricordo speciale! ❤️',
