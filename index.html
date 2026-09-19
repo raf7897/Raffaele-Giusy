@@ -37,7 +37,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-black); color: var(--text-main); min-height: 100vh; padding-bottom: 50px; transition: background-color 0.3s, color 0.3s; }
 
-        /* INTRO ANIMATA CUORE (ESATTAMENTE 2 BATTITI = 1.8 SECONDI) */
+        /* INTRO ANIMATA CUORE (2 BATTITI = 1.8s) */
         #intro-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background-color: #000; display: flex; justify-content: center; align-items: center;
@@ -111,9 +111,7 @@
             width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border: 2px solid var(--bg-black); display: flex; justify-content: center; align-items: center;
         }
-        .gallery-icon-svg {
-            width: 28px; height: 28px;
-        }
+        .gallery-icon-svg { width: 28px; height: 28px; }
         .story-title { font-size: 0.75rem; color: var(--text-muted); text-align: center; }
         .story-item.active .story-title { color: var(--text-main); font-weight: 600; }
 
@@ -282,13 +280,13 @@
 
         <!-- STORIE IN EVIDENZA -->
         <div class="stories-container">
-            <div class="story-item active" onclick="showSection('storia', this)">
+            <div class="story-item active" id="story-btn-storia" onclick="showSection('storia', this)">
                 <div class="story-ring">
                     <img src="https://i.postimg.cc/3NsWF9Kz/1789591196114.png" alt="La Storia" class="story-thumb">
                 </div>
                 <span class="story-title">La Storia</span>
             </div>
-            <div class="story-item" onclick="showSection('multimedia', this)">
+            <div class="story-item" id="story-btn-multimedia" onclick="showSection('multimedia', this)">
                 <div class="story-ring">
                     <div class="story-thumb-gallery">
                         <svg class="gallery-icon-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -307,13 +305,13 @@
                 </div>
                 <span class="story-title">Media</span>
             </div>
-            <div class="story-item" onclick="showSection('raffaele', this)">
+            <div class="story-item" id="story-btn-raffaele" onclick="showSection('raffaele', this)">
                 <div class="story-ring">
                     <img src="https://i.postimg.cc/rp2RhvbN/IMG-20230930-114318-945.jpg" alt="Raffaele" class="story-thumb">
                 </div>
                 <span class="story-title">Raffaele</span>
             </div>
-            <div class="story-item" onclick="showSection('giusy', this)">
+            <div class="story-item" id="story-btn-giusy" onclick="showSection('giusy', this)">
                 <div class="story-ring">
                     <img src="https://i.postimg.cc/8kY5K2fW/20250301-113541.jpg" alt="Giusy" class="story-thumb">
                 </div>
@@ -360,7 +358,7 @@
                     <p>Nel frattempo Giusy prendeva sempre più parte del suo cuore, entrando in punta di piedi, giorno dopo giorno.</p>
                     <p>I due iniziarono ad uscire tutti i fine settimana, Raffaele coglieva l'attimo per andare a trovarla anche solo per un'ora. Giusy si iniziò a rendere conto che stava nascendo qualcosa di diverso dal passato. Raffaele anche.</p>
                     <p><b>Sul laghetto dell'Eur</b>, una domenica mattina, dopo aver fatto un bell'aperitivo al bar vista lago, i due presero a passeggiare lungo le stradine. Quando ad un certo punto avvenne una magia, qualcosa di indescrivibile, di una purezza affascinante e bella: <b>il loro primo bacio...</b></p>
-                    <p>Da lì in poi i two capirono che stava nascendo qualcosa di più di una semplice conoscenza...</p>
+                    <p>Da lì in poi i due capirono che stava nascendo qualcosa di più di una semplice conoscenza...</p>
                     <p>Poi andarono a pranzo al lago Albano, dove passarono una giornata molto gradevole e per finire, una passeggiata con tanto di sosta sdraiati in riva al lago. Raffaele le cantava canzoni, la baciava, la riempiva di carezze, fu una giornata magica...</p>
                     <p>Però il giorno in cui i loro cuori si sono legati ancor più in un legame profondo, fu quando un sabato pomeriggio Raffaele si fece 3 ore e mezza di macchina andata e ritorno per stare poco più di un'ora con la sua Giusy; quel giorno è rimasso impresso nelle loro menti e nei loro cuori in modo indissolubile.</p>
 
@@ -374,7 +372,7 @@
                     <p>Il <b>26 dicembre 2025</b>, si va con tutta la famiglia di Giusy a Tropea, il posto dove si sono conosciuti l'anno prima.</p>
                     <p>In quelle stradine magiche, ornamentate per il Natale, alla vista panoramica del castello, Raffaele si inginocchia davanti a Giusy con un anello di diamante: <br><br><b><i>"Amore mio, mi vuoi sposare?"</i></b></p>
                     <p>Giusy senza esitazione: <b><i>"Sìì!"</i></b></p>
-                    <p>I two si abbracciano, si baciano, con l'applauso dei passanti. Dentro di loro si è appena posato il primo mattone per la costruzione di quello che dovrà essere un amore eterno, il loro <i>"e vissero per sempre felici e contenti"</i>.</p>
+                    <p>I due si abbracciano, si baciano, con l'applauso dei passanti. Dentro di loro si è appena posato il primo mattone per la costruzione di quello che dovrà essere un amore eterno, il loro <i>"e vissero per sempre felici e contenti"</i>.</p>
 
                     <p style="text-align: center; color: var(--accent-blue); font-weight: 700; margin-top: 25px; font-size: 1.1rem;">
                         Il resto è storia... ❤️✨
@@ -390,7 +388,7 @@
                 <div class="ig-card-header">
                     <div class="ig-card-header-left">
                         <span>🎬</span>
-                        <div class="ig-card-title">Raccenti Multimediali</div>
+                        <div class="ig-card-title">Racconti Multimediali</div>
                     </div>
                 </div>
                 <div class="ig-card-body"><p>Tieni premuto per l'anteprima, tocca per aprire a schermo intero:</p></div>
@@ -546,8 +544,8 @@
         let touchStartPos = { x: 0, y: 0 };
         let isScrolling = false;
         let activeEditKey = null;
+        let currentSection = 'storia';
 
-        // Salva i testi originali per ripristino
         const defaultTexts = {};
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -559,18 +557,57 @@
                     if (saved) el.innerHTML = saved;
                 }
             });
+
+            // Imposta lo stato iniziale della cronologia
+            history.replaceState({ section: 'storia', modalOpen: false }, '', '');
         });
 
-        // INTRO OVERLAY CON DURATA EXACTA 2 BATTITI (1.8s)
+        // GESTIONE TASTO INDIETRO DEL BROWSER/DISPOSITIVO (History API)
+        window.addEventListener('popstate', (event) => {
+            const lightbox = document.getElementById('lightbox');
+            const editModal = document.getElementById('edit-modal');
+
+            if (lightbox.classList.contains('active')) {
+                closeLightbox(false);
+                return;
+            }
+
+            if (editModal.classList.contains('active')) {
+                closeEditModal(false);
+                return;
+            }
+
+            if (event.state && event.state.section) {
+                switchSectionUI(event.state.section);
+            } else {
+                switchSectionUI('storia');
+            }
+        });
+
         setTimeout(() => {
             document.getElementById('intro-overlay').classList.add('fade-out');
         }, 1800);
 
-        function showSection(sectionId, storyElement) {
+        function showSection(sectionId, storyElement, pushHistory = true) {
+            if (currentSection === sectionId) return;
+            switchSectionUI(sectionId);
+
+            if (pushHistory) {
+                history.pushState({ section: sectionId, modalOpen: false }, '', '');
+            }
+        }
+
+        function switchSectionUI(sectionId) {
+            currentSection = sectionId;
             document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('.story-item').forEach(st => st.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
-            storyElement.classList.add('active');
+
+            const secEl = document.getElementById(sectionId);
+            const btnEl = document.getElementById(`story-btn-${sectionId}`);
+
+            if (secEl) secEl.classList.add('active');
+            if (btnEl) btnEl.classList.add('active');
+
             if (sectionId === 'multimedia') loadDriveMedia();
         }
 
@@ -581,11 +618,15 @@
             document.getElementById('edit-textarea').value = bodyEl ? bodyEl.innerHTML : '';
             document.getElementById('edit-modal-title').innerText = `Modifica: ${key.toUpperCase()}`;
             document.getElementById('edit-modal').classList.add('active');
+            history.pushState({ section: currentSection, modalOpen: true }, '', '');
         }
 
-        function closeEditModal() {
+        function closeEditModal(popHistory = true) {
             document.getElementById('edit-modal').classList.remove('active');
             activeEditKey = null;
+            if (popHistory && history.state && history.state.modalOpen) {
+                history.back();
+            }
         }
 
         function saveStoryText() {
@@ -613,7 +654,7 @@
             }
         }
 
-        /* GESTIONE MEDIA GOOGLE DRIVE */
+        /* GESTIONE MEDIA GOOGLE DRIVE (CON CARICAMENTO VELOCE) */
         function loadDriveMedia() {
             const grid = document.getElementById('media-grid');
 
@@ -626,9 +667,15 @@
                     }
                     mediaList = data;
                     grid.innerHTML = data.map((item, index) => {
+                        // OTTIMIZZAZIONE VELOCITA: Richiede la versione ridimensionata a 800px da Google
+                        let fastUrl = item.url;
+                        if (!item.mimeType.startsWith('video/') && item.url.includes('googleusercontent.com')) {
+                            fastUrl = item.url + "=w800";
+                        }
+
                         const mediaHtml = item.mimeType.startsWith('video/')
                             ? `<video src="${item.url}#t=0.5" preload="metadata"></video>`
-                            : `<img src="${item.url}" loading="lazy" alt="Ricordo">`;
+                            : `<img src="${fastUrl}" loading="lazy" alt="Ricordo">`;
                         
                         return `<div class="ig-grid-item" 
                                      ontouchstart="handleTouchStart(event, ${index})" 
@@ -700,10 +747,15 @@
             const item = mediaList[index];
             if (!item) return;
 
+            let previewUrl = item.url;
+            if (!item.mimeType.startsWith('video/') && item.url.includes('googleusercontent.com')) {
+                previewUrl = item.url + "=w800";
+            }
+
             if (item.mimeType.startsWith('video/')) {
                 container.innerHTML = `<video src="${item.url}" autoplay loop muted></video>`;
             } else {
-                container.innerHTML = `<img src="${item.url}" alt="Anteprima">`;
+                container.innerHTML = `<img src="${previewUrl}" alt="Anteprima">`;
             }
             previewModal.classList.add('active');
         }
@@ -721,11 +773,15 @@
             const lightbox = document.getElementById('lightbox');
             lightbox.classList.add('active');
             renderMedia();
+            history.pushState({ section: currentSection, modalOpen: true }, '', '');
         }
 
-        function closeLightbox() {
+        function closeLightbox(popHistory = true) {
             document.getElementById('lightbox').classList.remove('active');
             document.getElementById('lightbox-container').innerHTML = '';
+            if (popHistory && history.state && history.state.modalOpen) {
+                history.back();
+            }
         }
 
         function renderMedia() {
